@@ -2,29 +2,117 @@ package cn.iamdt.forumautomation.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
+import java.security.SecureRandom;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 
 public class MD5Utils {
-    // 生成MD5签名
-    public static String generateMD5Sign(int catId, long time) {
-        String source = "cat_id" + catId + "time" + time + "fa1c28a5b62e79c3e63d9030b6142e4b";
+    // 字符串秘钥，用于拼接到参数字符串的末尾（生成签到、发帖、评论的Sign时用到）
+    private static final String KEY_SECRET = "fa1c28a5b62e79c3e63d9030b6142e4b";
+
+    // 密钥字符串，用于拼接到参数字符串的末尾（生成图片上传的Sign时用到）
+    private static final String SECRET_KEY = "my_sign@huluxia.com";
+
+
+    // 生成发帖功能的sign
+    public static String generateSign(String _key, String detail, String images, String title) {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("_key", _key);
+        params.put("detail", detail);
+        params.put("device_code", "");
+        params.put("images", images);
+        params.put("title", title);
+        params.put("voice", "");
+        return calculateMD5(params);
+    }
+
+    // 生成回复评论功能的sign
+    public static String generateSign(String _key, String post_id, String text) {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("_key", _key);
+        params.put("comment_id", "0");
+        params.put("device_code", "");
+        params.put("images", "");
+        params.put("post_id", post_id);
+        params.put("text", text);
+        return calculateMD5(params);
+    }
+
+    // 生成签到功能的sign
+    public static String generateSign(String cat_id, String time) {
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("cat_id", cat_id);
+        params.put("time", time);
+        return calculateMD5(params);
+    }
+
+    // 生成图片上传功能的sign
+    public static String generatePicSign(String _key, String app_version, String device_code, String timestamp) {
+        // 生成nonce_str
+        String nonce_str = generateNonceStrUsingSecureRandom();
+
+        // 拼接参数字符串
+        String paramsStr = "_key=" + _key
+                + "&app_version=" + app_version
+                + "&device_code=" + device_code
+                + "&gkey=000000"
+                + "&market_id=floor_tencent"
+                + "&nonce_str=" + nonce_str
+                + "&platform=2"
+                + "&timestamp=" + timestamp
+                + "&use_type=3"
+                + "&versioncode=20141470"
+                + "&secret=" + SECRET_KEY;
+
+        // 计算MD5并返回
+        return Objects.requireNonNull(getMD5String(paramsStr)).toUpperCase();
+    }
+
+    // 辅助方法：将参数排序并拼接，然后计算MD5
+    private static String calculateMD5(TreeMap<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append(entry.getValue());
+        }
+        sb.append(KEY_SECRET);
+        return getMD5String(sb.toString());
+    }
+
+    // 辅助方法：计算字符串的MD5
+    private static String getMD5String(String text) {
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5"); // 获取MD5实例
-            return byteArray2Hex(md.digest(source.getBytes())); // 返回MD5签名的十六进制字符串
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            byte[] inputByteArray = text.getBytes();
+            messageDigest.update(inputByteArray);
+            byte[] resultByteArray = messageDigest.digest();
+            return byteArrayToHex(resultByteArray).toUpperCase();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
             return null;
         }
     }
 
-    // 将字节数组转换为十六进制字符串
-    private static String byteArray2Hex(final byte[] hash) {
-        Formatter formatter = new Formatter();
-        for (byte b : hash) {
-            formatter.format("%02x", b);
+    // 辅助方法：将字节数组转换为十六进制字符串
+    private static String byteArrayToHex(byte[] byteArray) {
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] resultCharArray = new char[byteArray.length * 2];
+        int index = 0;
+        for (byte b : byteArray) {
+            resultCharArray[index++] = hexDigits[b >>> 4 & 0xf];
+            resultCharArray[index++] = hexDigits[b & 0xf];
         }
-        String result = formatter.toString();
-        formatter.close();
-        return result;
+        return new String(resultCharArray);
+    }
+
+    // 辅助方法：生成nonce_str (随机的32位字符串)
+    private static String generateNonceStrUsingSecureRandom() {
+        SecureRandom random = new SecureRandom();
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        StringBuilder nonceStr = new StringBuilder();
+        for (int i = 0; i < 32; i++) {
+            nonceStr.append(chars[random.nextInt(chars.length)]);
+        }
+        return nonceStr.toString();
     }
 }
