@@ -1,4 +1,4 @@
-package cn.iamdt.forumautomation.utils;
+package cn.iamdt.HuluxiaTools.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class HttpConnection {
+    // TODO：准备整合图片上传HttpURLConnection至本类中
     public static HttpURLConnection getHttpURLConnection(String urlString, String params) throws IOException {
         URL url = new URL(urlString);
         java.net.HttpURLConnection con = (java.net.HttpURLConnection) url.openConnection();
@@ -29,4 +30,6 @@ public class HttpConnection {
         }
         return con;
     }
+
+
 }

@@ -1,7 +1,7 @@
-package cn.iamdt.forumautomation;
+package cn.iamdt.HuluxiaTools;
 
-import cn.iamdt.forumautomation.utils.HttpConnection;
-import cn.iamdt.forumautomation.utils.MD5Utils;
+import cn.iamdt.HuluxiaTools.utils.HttpConnection;
+import cn.iamdt.HuluxiaTools.utils.MD5Utils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -64,7 +64,8 @@ public class SignInUtility {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String userKey = "C735451576B94B492652EFC27D549B931A47E7D8C97CD223A9CD465843953137F28AA8328697373EF08FD3549D410F41C84AF1780AC3B564";
+        // 测试代码
+        String userKey = "";
         // 进行签到
         SignInForAllCategories(userKey);
     }

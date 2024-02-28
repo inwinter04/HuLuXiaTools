@@ -1,4 +1,4 @@
-package cn.iamdt.forumautomation.utils;
+package cn.iamdt.HuluxiaTools.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +15,7 @@ public class ConfigLoader {
 
     // 从配置文件加载属性
     private void loadProperties() {
-        // 注意：路径是相对于类路径的ConfigLoader类的位置
-        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("cn/iamdt/HuluxiaTools/config.properties")) {
             if (input == null) {
                 System.out.println("无法找到配置文件！");
                 return;

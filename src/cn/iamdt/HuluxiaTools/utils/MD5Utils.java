@@ -1,4 +1,4 @@
-package cn.iamdt.forumautomation.utils;
+package cn.iamdt.HuluxiaTools.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -48,25 +48,36 @@ public class MD5Utils {
     }
 
     // 生成图片上传功能的sign
-    public static String generatePicSign(String _key, String app_version, String device_code, String timestamp) {
-        // 生成nonce_str
-        String nonce_str = generateNonceStrUsingSecureRandom();
+    public static String generatePicSign(String _key, String nonce_str, long timeMillis) {
+        // 生成nonce_str，此代码即将移动至生成请求体时调用
+        // String nonce_str = generateNonceStrUsingSecureRandom();
 
         // 拼接参数字符串
         String paramsStr = "_key=" + _key
-                + "&app_version=" + app_version
-                + "&device_code=" + device_code
+                + "&app_version=4.3.0.2"
+                + "&device_code=[d]1ed2762d-4019-4e37-8658-442c9467ec63"
                 + "&gkey=000000"
-                + "&market_id=floor_tencent"
+                + "&market_id=floor_web"
                 + "&nonce_str=" + nonce_str
                 + "&platform=2"
-                + "&timestamp=" + timestamp
-                + "&use_type=3"
-                + "&versioncode=20141470"
+                + "&timestamp=" + timeMillis
+                + "&use_type=2"
+                + "&versioncode=20141492"
                 + "&secret=" + SECRET_KEY;
 
         // 计算MD5并返回
         return Objects.requireNonNull(getMD5String(paramsStr)).toUpperCase();
+    }
+
+    // 辅助方法：生成nonce_str (随机的32位字符串)
+    public static String generateNonceStrUsingSecureRandom() {
+        SecureRandom random = new SecureRandom();
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        StringBuilder nonceStr = new StringBuilder();
+        for (int i = 0; i < 32; i++) {
+            nonceStr.append(chars[random.nextInt(chars.length)]);
+        }
+        return nonceStr.toString();
     }
 
     // 辅助方法：将参数排序并拼接，然后计算MD5
@@ -103,16 +114,5 @@ public class MD5Utils {
             resultCharArray[index++] = hexDigits[b & 0xf];
         }
         return new String(resultCharArray);
-    }
-
-    // 辅助方法：生成nonce_str (随机的32位字符串)
-    private static String generateNonceStrUsingSecureRandom() {
-        SecureRandom random = new SecureRandom();
-        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-        StringBuilder nonceStr = new StringBuilder();
-        for (int i = 0; i < 32; i++) {
-            nonceStr.append(chars[random.nextInt(chars.length)]);
-        }
-        return nonceStr.toString();
     }
 }

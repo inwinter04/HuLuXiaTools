@@ -1,8 +1,8 @@
-package cn.iamdt.forumautomation;
+package cn.iamdt.HuluxiaTools;
 
-import cn.iamdt.forumautomation.utils.AtUserData;
-import cn.iamdt.forumautomation.utils.HttpConnection;
-import cn.iamdt.forumautomation.utils.MD5Utils;
+import cn.iamdt.HuluxiaTools.utils.AtUserData;
+import cn.iamdt.HuluxiaTools.utils.HttpConnection;
+import cn.iamdt.HuluxiaTools.utils.MD5Utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -73,7 +73,7 @@ public class CreateCommentUtility {
      */
     public static void main(String[] args) {
         // 替换为实际的用户登录秘钥
-        String userKey = "C735451576B94B492652EFC27D549B931A47E7D8C97CD223A9CD465843953137F28AA8328697373EF08FD3549D410F41C84AF1780AC3B564";
+        String userKey = "";
         // 替换为实际的帖子ID和评论ID（如果是新评论则为0），以及评论文本内容
         long postId = 53365120;
         long commentId = 0; // 新评论

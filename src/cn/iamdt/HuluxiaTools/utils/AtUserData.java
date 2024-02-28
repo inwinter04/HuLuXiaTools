@@ -1,4 +1,4 @@
-package cn.iamdt.forumautomation.utils;
+package cn.iamdt.HuluxiaTools.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
