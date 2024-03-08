@@ -7,7 +7,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class HttpConnection {
-    // TODO：准备整合图片上传HttpURLConnection至本类中
+    // 此方法用于普通的Http请求
     public static HttpURLConnection getHttpURLConnection(String urlString, String params) throws IOException {
         URL url = new URL(urlString);
         java.net.HttpURLConnection con = (java.net.HttpURLConnection) url.openConnection();
@@ -31,5 +31,21 @@ public class HttpConnection {
         return con;
     }
 
-
+    // 此方法用于处理multipart/form-data类型的请求
+    public static HttpURLConnection getMultipartHttpURLConnection(String requestURL, String boundary) throws IOException {
+        URL url = new URL(requestURL);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setUseCaches(false);
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        // 设置请求方法为POST
+        con.setRequestMethod("POST");
+        // 设置请求头
+        con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        con.setRequestProperty("User-Agent", "okhttp/3.8.1");
+        con.setRequestProperty("Accept-Encoding", "gzip");
+        con.setRequestProperty("Connection", "close");
+        con.setRequestProperty("Host", "upload.huluxia.com");
+        return con;
+    }
 }

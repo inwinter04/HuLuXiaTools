@@ -4,7 +4,6 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -12,7 +11,6 @@ public class ImageUploader {
     // 此方法用于上传图片并返回fid
     public static String uploadImage(String key, File imageFile) throws IOException {
         String boundary = UUID.randomUUID().toString();
-        String charset = "UTF-8";
         String requestURL = "http://upload.huluxia.com/upload/v3/image";
 
         // 获取当前时间戳
@@ -25,22 +23,11 @@ public class ImageUploader {
         // 请求参数
         String parameters = "platform=2&gkey=000000&app_version=4.3.0.2&versioncode=20141492&market_id=floor_web&_key=" + key + "&device_code=%5Bd%5D1ed2762d-4019-4e37-8658-442c9467ec63&use_type=2&sign=" + sign + "&timestamp=" + timeMillis + "&nonce_str=" + nonce_str;
 
-        // 创建一个URL对象
-        URL url = new URL(requestURL + "?" + parameters);
-        // 打开连接
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        httpConn.setUseCaches(false);
-        httpConn.setDoOutput(true); // indicates POST method
-        httpConn.setDoInput(true);
-        httpConn.setRequestMethod("POST");
-        httpConn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-        httpConn.setRequestProperty("User-Agent", "okhttp/3.8.1");
-        httpConn.setRequestProperty("Accept-Encoding", "gzip");
-        httpConn.setRequestProperty("Connection", "close");
-        httpConn.setRequestProperty("Host", "upload.huluxia.com");
+        // 使用HttpConnection类的方法来获取连接
+        HttpURLConnection httpConn = HttpConnection.getMultipartHttpURLConnection(requestURL + "?" + parameters, boundary);
 
         OutputStream outputStream = httpConn.getOutputStream();
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
 
         // 发送文件数据
         writer.append("--").append(boundary).append("\r\n");
@@ -51,7 +38,7 @@ public class ImageUploader {
 
         FileInputStream inputStream = new FileInputStream(imageFile);
         byte[] buffer = new byte[4096];
-        int bytesRead = -1;
+        int bytesRead;
         while ((bytesRead = inputStream.read(buffer)) != -1) {
             outputStream.write(buffer, 0, bytesRead);
         }
@@ -65,25 +52,29 @@ public class ImageUploader {
         // 检查服务器的响应代码
         int status = httpConn.getResponseCode();
         if (status == HttpURLConnection.HTTP_OK) {
-            InputStream responseStream = new BufferedInputStream(httpConn.getInputStream());
-            BufferedReader responseStreamReader = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8));
-
-            String line;
-            StringBuilder stringBuilder = new StringBuilder();
-            while ((line = responseStreamReader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            responseStreamReader.close();
-
-            // 解析返回的内容
-            JSONObject response = new JSONObject(stringBuilder.toString());
-            String fid = response.getString("fid");
+            String fid = getFid(httpConn);
 
             httpConn.disconnect();
             return fid; // 返回fid
         } else {
             throw new IOException("Server returned non-OK status: " + status);
         }
+    }
+
+    private static String getFid(HttpURLConnection httpConn) throws IOException {
+        InputStream responseStream = new BufferedInputStream(httpConn.getInputStream());
+        BufferedReader responseStreamReader = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8));
+
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+        while ((line = responseStreamReader.readLine()) != null) {
+            stringBuilder.append(line);
+        }
+        responseStreamReader.close();
+
+        // 解析返回的内容
+        JSONObject response = new JSONObject(stringBuilder.toString());
+        return response.getString("fid");
     }
 
     // 测试方法
